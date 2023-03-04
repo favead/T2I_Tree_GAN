@@ -12,14 +12,6 @@ def show_image(img: np.ndarray) -> None:
     plt.show()
 
 
-def visualize_history(data: dict, figsize: Tuple[int, int] = (10, 6)) -> None:
-    fig, ax = plt.subplots(figsize=figsize)
-    sns.lineplot(x=data["epoch"], y=data["value"], label=data["label"])
-    ax.set_ylabel(data["ylabel"])
-    ax.set_xlabel(data["xlabel"])
-    plt.show()
-
-
 def visualize_surface(X: np.ndarray, Y: np.ndarray, Z: np.ndarray, data: dict,
                        figsize: Tuple[int, int] = (30, 15), save: bool = False) -> None:
     fig = plt.figure(figsize=figsize)

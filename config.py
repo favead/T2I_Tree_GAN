@@ -7,6 +7,7 @@ class Config:
     """
     Configure when developing new model
     """
+    version: str
     batch_size: int
     epochs: int
     gamma: float
