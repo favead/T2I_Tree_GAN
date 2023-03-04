@@ -1,7 +1,3 @@
-import torch
-from torch import Tensor
-
-
 class AverageMeter:
     def __init__(self):
         self.reset()
