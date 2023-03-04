@@ -1,2 +1,2 @@
-# ml_template
-Template for developing ML/DL projects
+# SRGAN
+My own implementation of SRGAN for single image super resolution.
