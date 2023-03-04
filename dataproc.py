@@ -3,15 +3,30 @@ from torch import Tensor
 from torch.utils.data import Dataset
 import h5py
 import numpy as np
+from imageproc import read_image, resize_image, crop_image
 
 
 class DatasetCreator:
-    def __init__(self, filename: str) -> None:
+    def __init__(self, filename: str, crop_times: int, img_files: List[str],
+                crop_area: int, scale: int) -> None:
        self.filename = filename
+       self.crop_times = crop_times
+       self.img_files = img_files
+       self.crop_area = crop_area
+       self.scale = scale
        return None
     
     def create_dataset(self) -> Tuple[np.ndarray, np.ndarray]:
-        pass
+        x_patches, y_patches = [], []
+        for y_path in self.files:
+            y = read_image(y_path)
+            for _ in self.crop_times:
+                y_crop = crop_image(y, self.crop_area)
+                inter = np.random.randint(0, 3)
+                x_crop = resize_image(y_crop, self.scale, is_up=False, typ=inter)
+                x_patches.append(x_crop)
+                y_patches.append(y_crop)
+        return x_patches, y_patches
 
     def h5py_dataset_template(self) -> None:
         f = h5py.File(self.filename, 'a')
