@@ -45,7 +45,7 @@ def calculate_metrices(lin_img: np.ndarray, cub_img: np.ndarray,
 
 
 def log_image_table(out_images: List[np.ndarray], gt: List[np.ndarray],
-                    filenames: List[str], name: str, wandb: Module, 
+                    filenames: List[str], name: str, wandb: object, 
                     Config: dict, read_image: Callable, resize_image: Callable,
                     rgb2srgb: Callable) -> None:
     wandb.init(

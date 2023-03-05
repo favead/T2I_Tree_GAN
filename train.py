@@ -20,7 +20,7 @@ def predict_one_sample(model: nn.Module, lr: Tensor, device: torch.device,
 
 def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimizer],
           scheduler: Dict[str, StepLR], loss_func: Dict[str, Callable], metric: Callable,
-          wght_dir: Tuple[str, str], batch_size: int, epochs: int, wandb: Module,
+          wght_dir: Tuple[str, str], batch_size: int, epochs: int, wandb: object,
           device: torch.device, tqdm, vgg_modules: List[nn.Module], Config: dict,
           AverageMeter: object) -> None:
     dloader = DataLoader(dataset, shuffle=True, batch_size=batch_size, num_workers=2)
