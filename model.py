@@ -4,7 +4,6 @@ from torch import nn, Tensor
 import torch.nn.functional as F
 from torchvision.models import VGG19_BN_Weights, vgg19_bn
 from torch import nn, Tensor
-from SRGAN.settings import Config
 
 
 class GenResBlock(nn.Module):
@@ -101,13 +100,14 @@ class Discriminator(nn.Module):
         return out4
 
 
-def get_vgg_model(device: torch.device) -> nn.Module:
+def get_vgg_model(device: torch.device, Config: dict) -> nn.Module:
     vgg = vgg19_bn(weights=VGG19_BN_Weights.IMAGENET1K_V1)
     modules = list(vgg.features.requires_grad_(False).children())[:Config.vgg_layers[-1] + 1]
     return modules.to(device)
 
 
-def get_vgg_maps(vgg_modules: nn.Module, fake: Tensor, real: Tensor, device: torch.device) -> List[Tensor]:
+def get_vgg_maps(vgg_modules: nn.Module, fake: Tensor, real: Tensor, device: torch.device,
+                 Config: dict) -> List[Tensor]:
     vgg_loss = []
     x = (fake.clone() + 1.) / 2.
     y = (real.clone() + 1.) / 2.
