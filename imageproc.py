@@ -35,7 +35,7 @@ def image2tensor(img: np.ndarray, normalize: bool = True) -> Tensor:
     return tensor
 
 
-def tensor2image(timg: Tensor, normalize: bool = True, only_y: bool = True) -> np.ndarray:
+def tensor2image(timg: Tensor, normalize: bool = True, only_y: bool = False) -> np.ndarray:
     ftimg = timg.clone()
     if normalize:
         ftimg.add_(1.0).div_(2.0)

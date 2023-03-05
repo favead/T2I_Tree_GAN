@@ -4,6 +4,7 @@ from torch.utils.data import Dataset
 import h5py
 import numpy as np
 from imageproc import read_image, resize_image, crop_image
+from settings import Config
 
 
 class DatasetCreator:
@@ -39,9 +40,35 @@ class DatasetCreator:
         return None
 
 
-class SRDataset(Dataset):
+
+class SRFolderDataset(Dataset):
+    def __init__(self, files: List[str], ts: Callable = None,
+                 crop_times: int = Config.crop_times, scale: int = Config.scale,
+                 crop_area: int = Config.crop_area) -> None:
+        super(SRFolderDataset, self).__init__()
+        self.files = files
+        self.ts = ts
+        self.crop_times = crop_times
+        self.scale = scale
+        self.crop_area = crop_area
+        
+    def __getitem__(self, indx: int) -> Tuple[Tensor, Tensor]:
+        hr = read_image(self.files[indx // self.crop_times])
+        hr_crop = crop_image(hr, self.crop_area)
+        inter = np.random.randint(0, 3)
+        lr_crop = resize_image(hr_crop, scale=self.scale, is_up=False, typ=inter)
+        for t in self.ts:
+            hr_crop = t(hr_crop)
+            lr_crop = t(lr_crop)
+        return lr_crop, hr_crop
+        
+    def __len__(self) -> int:
+        return len(self.files) * self.crop_times
+
+
+class SRFileDataset(Dataset):
     def __init__(self, h5py_filename: str, ts: Callable = None) -> None:
-        super(SRDataset, self).__init__()
+        super(SRFileDataset, self).__init__()
         self.h5py_filename = h5py_filename
         self.ts = ts
         

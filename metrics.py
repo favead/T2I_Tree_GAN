@@ -1,5 +1,5 @@
 import os
-from typing import List, Module
+from typing import List, Module, Dict
 import torch
 from torch import Tensor
 import numpy as np
@@ -31,6 +31,23 @@ def calc_psnr(img1: Tensor, img2: Tensor) -> float:
     return 10. * torch.log10(1. / torch.mean((img1 - img2) ** 2))
 
 
+def calculate_metrices(lin_img: np.ndarray, cub_img: np.ndarray, 
+                       hr_img: np.ndarray, nn_img: np.ndarray,
+                        scale: int = Config.scale) -> Dict[str, float]:
+    metrices = {"lin_psnr": 0., "lin_ssim": 0., "nn_psnr": 0., "nn_ssim": 0.,
+                "cub_psnr": 0., "cub_ssim": 0.}
+    metrices["nn_psnr"] = cv2.PSNR(nn_img, hr_img)
+    metrices["lin_psnr"] = cv2.PSNR(lin_img, hr_img)
+    metrices["cub_psnr"] = cv2.PSNR(cub_img, hr_img)
+    metrices["nn_ssim"] = structural_similarity(nn_img, hr_img, channel_axis=2,
+                                            multichannel=True)
+    metrices["lin_ssim"]= structural_similarity(lin_img, hr_img, channel_axis=2,
+                                            multichannel=True)
+    metrices["cub_ssim"] = structural_similarity(cub_img, hr_img, channel_axis=2,
+                                    multichannel=True)
+    return metrices
+
+
 def log_image_table(out_images: List[np.ndarray], gt: List[np.ndarray],
                     filenames: List[str], name: str, wandb: Module, 
                     scale: int = Config.scale,) -> None:
@@ -50,26 +67,18 @@ def log_image_table(out_images: List[np.ndarray], gt: List[np.ndarray],
         lr_img = read_image(lr_p)
         lin_img = resize_image(lr_img, scale, is_up=True, typ=cv2.INTER_LINEAR)
         cub_img = resize_image(lr_img, scale, is_up=True, typ=cv2.INTER_CUBIC)
-        nn_psnr = cv2.PSNR(out_images[i], gt[i])
-        lin_psnr = cv2.PSNR(lin_img, gt[i])
-        cub_psnr = cv2.PSNR(cub_img, gt[i])
-        nn_ssim = structural_similarity(out_images[i], gt[i], channel_axis=2,
-                                             multichannel=True)
-        lin_ssim = structural_similarity(lin_img, gt[i], channel_axis=2,
-                                             multichannel=True)
-        cub_ssim = structural_similarity(cub_img, gt[i], channel_axis=2,
-                                     multichannel=True)
+        metrices = calculate_metrices(lin_img, cub_img, gt[i], out_images[i], scale)
         table.add_data(wandb.Image(rgb2srgb(lin_img)),
                        wandb.Image(rgb2srgb(cub_img)),
                        wandb.Image(rgb2srgb(out_images[i])),
                        wandb.Image(rgb2srgb(gt[i])),
                        str(os.path.basename(lr_p)),
-                       nn_psnr,
-                       nn_ssim,
-                       nn_psnr / lin_psnr,
-                       nn_ssim / lin_ssim,
-                       nn_psnr / cub_psnr,
-                       nn_ssim / cub_ssim)
+                       metrices["nn_psnr"],
+                       metrices["nn_ssim"],
+                       metrices["nn_psnr"] / metrices["lin_psnr"],
+                       metrices["nn_ssim"] / metrices["lin_ssim"],
+                       metrices["nn_psnr"] / metrices["cub_psnr"],
+                       metrices["nn_ssim"] / metrices["cub_ssim"])
     wandb.log({"benchmark_set14":table}, commit=False)
     wandb.finish()
     return None

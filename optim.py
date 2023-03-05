@@ -1,9 +1,10 @@
 import torch
 from torch.optim.optimizer import Optimizer
+from settings import Config
 
 
 class Lion(Optimizer):
-    def __init__(self, params, lr=1e-4, betas=(0.9, 0.99), weight_decay=0.0):
+    def __init__(self, params, lr=1e-4, betas=Config.betas, weight_decay=0.0):
         if not 0.0 <= lr:
             raise ValueError('Invalid learning rate: {}'.format(lr))
         if not 0.0 <= betas[0] < 1.0:
