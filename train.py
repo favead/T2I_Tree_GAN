@@ -109,13 +109,14 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
     return None
 
 
-def predict(model: nn.Module, test_dataset: Dataset) -> np.ndarray:
+def predict(model: nn.Module, test_dataset: Dataset, device: torch.device,
+            tensor2image: Callable) -> np.ndarray:
     model.eval()
     images = []
     out_images = []
     for i in range(len(test_dataset)):
         lr, hr_img = test_dataset[i]
-        out = predict_one_sample(model, lr)
+        out = predict_one_sample(model, lr, device, tensor2image)
         out_images.append(out)
         images.append(hr_img)
     return out_images, images
