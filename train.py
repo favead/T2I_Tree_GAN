@@ -34,8 +34,11 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
         wandb.init(
             project=f"{Config.version}_train",
             name=f"epoch_{epoch}",
-            config=Config
-        )
+            config={
+                "epochs": Config.epochs,
+                "batch_size": Config.batch_size,
+                "lr": Config.lr_gen
+        })
         disc_meter = AverageMeter()
         gen_meter = AverageMeter()
         gen_vgg_meter = AverageMeter()
