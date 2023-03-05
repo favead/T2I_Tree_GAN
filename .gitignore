@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+./tests
+./tests/config_test.py
+./venv/
+tests/config_test.py
+tests/__init__.py
