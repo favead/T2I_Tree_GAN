@@ -5,7 +5,7 @@ from torch import Tensor
 import numpy as np
 import cv2
 from skimage.metrics import structural_similarity
-from config import Config
+from settings import Config
 from imageproc import read_image, resize_image, rgb2srgb
 
 

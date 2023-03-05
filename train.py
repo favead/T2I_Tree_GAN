@@ -8,7 +8,7 @@ import numpy as np
 from dataproc import SRDataset, SRTestDataset
 from imageproc import tensor2image
 from optim import Lion
-from config import Config
+from settings import Config
 from metrics import AverageMeter
 
 
