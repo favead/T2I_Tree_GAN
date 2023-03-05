@@ -1,18 +1,20 @@
 from typing import Any, List, Tuple, Callable, Dict
-from dataclasses import dataclass
 
-
-@dataclass
-class Config:
-    version: str = "1.1.0"
-    batch_size: int = 64
-    crop_size: int = 9216
-    epochs: int = 10
-    scale: int = 2
-    gamma_gen: float = 0.8
-    gamma_disc: float = 0.8
-    time_step: int = 4
-    lr_gen: float = 2e-4
-    lr_disc: float = 2e-4
-    betas: Tuple[float, float] = (0.9, 0.5)
-    weight_dir: Tuple[str, str] = ("disc.pt, gen.pt")
+config = {
+    "version": "1.1.1",
+    "batch_size": 64,
+    "crop_size": 9216,
+    "epochs": 10,
+    "scale": 2,
+    "gamma_gen": 0.8,
+    "gamma_disc": 0.8,
+    "time_step": 4,
+    "lr_gen": 2e-4,
+    "lr_disc": 2e-4,
+    "betas": (0.9, 0.5),
+    "weight_dir": ("ch9_disc.pt, ch9_gen.pt"),
+    "crop_times": 16,
+    "crop_area": 9216,
+    "vgg_layers": (2, 5, 9, 12, 16, 19, 22),
+    "project_name": "SRGAN_1.1.1"
+}

@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union, Dict
 import torch
 from torch import nn, Tensor
 import torch.nn.functional as F
@@ -100,22 +100,22 @@ class Discriminator(nn.Module):
         return out4
 
 
-def get_vgg_model(Config: dict) -> nn.Module:
+def get_vgg_model(config: Dict[str, Union[int, float, str]]) -> nn.Module:
     vgg = vgg19_bn(weights=VGG19_BN_Weights.IMAGENET1K_V1)
-    modules = list(vgg.features.requires_grad_(False).children())[:Config.vgg_layers[-1] + 1]
+    modules = list(vgg.features.requires_grad_(False).children())[:config["vgg_layers"][-1] + 1]
     return modules
 
 
 def get_vgg_maps(vgg_modules: nn.Module, fake: Tensor, real: Tensor, device: torch.device,
-                 Config: dict) -> List[Tensor]:
+                 config: dict) -> List[Tensor]:
     vgg_loss = []
     x = (fake.clone() + 1.) / 2.
     y = (real.clone() + 1.) / 2.
-    for i in range(Config.vgg_layers[-1]):
+    for i in range(config["vgg_layers"][-1]):
         module = vgg_modules[i]
         x = module.to(device)(x)
         y = module.to(device)(y)
-        if i in Config.vgg_layers:
+        if i in config["vgg_layers"]:
             vgg_loss.append(F.l1_loss(x, y))
     return vgg_loss
 
@@ -127,8 +127,8 @@ def adversarial_loss(preds: Tensor, gt: Tensor) -> Tensor:
 
 def perceptual_loss(vgg_modules: List[nn.Module], fake: Tensor, real: Tensor,
                     preds: Tensor, gt: Tensor, device: torch.device,
-                    Config: dict) -> Tuple[Tensor, Tensor, Tensor]:
-    vgg_loss = sum(get_vgg_maps(vgg_modules, fake, real, device, Config))
+                    config: dict) -> Tuple[Tensor, Tensor, Tensor]:
+    vgg_loss = sum(get_vgg_maps(vgg_modules, fake, real, device, config))
     pixel_loss = F.l1_loss(real, fake)
     adv_loss = F.mse_loss(preds, gt)
     return vgg_loss, pixel_loss, adv_loss

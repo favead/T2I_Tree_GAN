@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Union
 import torch
 from torch import Tensor
 import numpy as np
@@ -46,25 +46,22 @@ def calculate_metrices(lin_img: np.ndarray, cub_img: np.ndarray,
 
 def log_image_table(out_images: List[np.ndarray], gt: List[np.ndarray],
                     filenames: List[str], name: str, wandb: object, 
-                    Config: dict, read_image: Callable, resize_image: Callable,
+                    config: Dict[str, Union[int, float, str]],
+                    read_image: Callable, resize_image: Callable,
                     rgb2srgb: Callable) -> None:
     wandb.init(
-        project=f"{Config.project_name}_test",
+        project=f"{config['project_name']}_test",
         name=name,
-        config={
-            "epochs": Config.epochs,
-            "batch_size": Config.batch_size,
-            "lr": Config.lr_gen
-            })
+        config=config)
     table = wandb.Table(columns=["linear", "cubic", "NN", "gt",
                                  "Filename", "PSNR", "SSIM", "NN/LIN PSNR",
                                  "NN/LIN SSIM", "NN/CUBIC PSNR", "NN/CUBIC SSIM"])
     for i in range(len(out_images)):
         lr_p, hr_p = filenames[i]
         lr_img = read_image(lr_p)
-        lin_img = resize_image(lr_img, Config.scale, is_up=True, typ=cv2.INTER_LINEAR)
-        cub_img = resize_image(lr_img, Config.scale, is_up=True, typ=cv2.INTER_CUBIC)
-        metrices = calculate_metrices(lin_img, cub_img, gt[i], out_images[i], Config.scale)
+        lin_img = resize_image(lr_img, config["scale"], is_up=True, typ=cv2.INTER_LINEAR)
+        cub_img = resize_image(lr_img, config["scale"], is_up=True, typ=cv2.INTER_CUBIC)
+        metrices = calculate_metrices(lin_img, cub_img, gt[i], out_images[i], config["scale"])
         table.add_data(wandb.Image(rgb2srgb(lin_img)),
                        wandb.Image(rgb2srgb(cub_img)),
                        wandb.Image(rgb2srgb(out_images[i])),

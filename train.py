@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict, Callable
+from typing import List, Tuple, Dict, Callable, Union
 import copy
 import torch
 from torch import Tensor, nn
@@ -21,7 +21,7 @@ def predict_one_sample(model: nn.Module, lr: Tensor, device: torch.device,
 def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimizer],
           scheduler: Dict[str, StepLR], loss_func: Dict[str, Callable], metric: Callable,
           wght_dir: Tuple[str, str], batch_size: int, epochs: int, wandb: object,
-          device: torch.device, tqdm, vgg_modules: List[nn.Module], Config: dict,
+          device: torch.device, tqdm, vgg_modules: List[nn.Module], config: Dict[str, Union[str, int, float]],
           AverageMeter: object) -> None:
     dloader = DataLoader(dataset, shuffle=True, batch_size=batch_size, num_workers=2)
     losses = {"ep_generator_vgg_loss":[], "ep_generator_pixel_loss": [], "ep_generator_adv": [],
@@ -32,13 +32,9 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
     best_metric = 0.0
     for epoch in tqdm(range(1, epochs + 1)):
         wandb.init(
-            project=f"{Config.version}_train",
+            project=f"{config['version']}_train",
             name=f"epoch_{epoch}",
-            config={
-                "epochs": Config.epochs,
-                "batch_size": Config.batch_size,
-                "lr": Config.lr_gen
-        })
+            config=config)
         disc_meter = AverageMeter()
         gen_meter = AverageMeter()
         gen_vgg_meter = AverageMeter()
@@ -69,7 +65,7 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
             sr_labels = torch.ones(len(hr), 1).to(device)
             sr_preds = model["discriminator"](sr)
             vgg_loss, pixel_loss, adv_loss = loss_func["generator"](vgg_modules, sr, hr, sr_preds, sr_labels,
-                                                                    device, Config)
+                                                                    device, config)
             loss = 0.006 * vgg_loss + 1e-2 * adv_loss + pixel_loss
             optim["generator"].zero_grad()
             loss.backward()
