@@ -5,11 +5,11 @@ from torch import Tensor, nn
 from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import StepLR
 import numpy as np
-from dataproc import SRDataset, SRTestDataset
-from imageproc import tensor2image
-from optim import Lion
-from settings import Config
-from metrics import AverageMeter
+from SRGAN.dataproc import SRDataset, SRTestDataset
+from SRGAN.imageproc import tensor2image
+from SRGAN.optim import Lion
+from SRGAN.settings import Config
+from SRGAN.metrics import AverageMeter
 
 
 def predict_one_sample(model: nn.Module, lr: Tensor, device: torch.device,

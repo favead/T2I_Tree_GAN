@@ -5,8 +5,8 @@ from torch import Tensor
 import numpy as np
 import cv2
 from skimage.metrics import structural_similarity
-from settings import Config
-from imageproc import read_image, resize_image, rgb2srgb
+from SRGAN.settings import Config
+from SRGAN.imageproc import read_image, resize_image, rgb2srgb
 
 
 

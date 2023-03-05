@@ -1,6 +1,6 @@
 import torch
 from torch.optim.optimizer import Optimizer
-from settings import Config
+from SRGAN.settings import Config
 
 
 class Lion(Optimizer):

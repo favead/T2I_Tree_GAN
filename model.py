@@ -4,7 +4,7 @@ from torch import nn, Tensor
 import torch.nn.functional as F
 from torchvision.models import VGG19_BN_Weights, vgg19_bn
 from torch import nn, Tensor
-from settings import Config
+from SRGAN.settings import Config
 
 
 class GenResBlock(nn.Module):
