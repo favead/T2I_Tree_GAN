@@ -3,8 +3,8 @@ from torch import Tensor
 from torch.utils.data import Dataset
 import h5py
 import numpy as np
-from imageproc import read_image, resize_image, crop_image
-from settings import Config
+from SRGAN.imageproc import read_image, resize_image, crop_image
+from SRGAN.settings import Config
 
 
 class DatasetCreator:
