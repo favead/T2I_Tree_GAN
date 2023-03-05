@@ -1,12 +1,10 @@
 import os
-from typing import List, Module, Dict
+from typing import List, Module, Dict, Callable
 import torch
 from torch import Tensor
 import numpy as np
 import cv2
 from skimage.metrics import structural_similarity
-from SRGAN.settings import Config
-from SRGAN.imageproc import read_image, resize_image, rgb2srgb
 
 
 
@@ -32,8 +30,7 @@ def calc_psnr(img1: Tensor, img2: Tensor) -> float:
 
 
 def calculate_metrices(lin_img: np.ndarray, cub_img: np.ndarray, 
-                       hr_img: np.ndarray, nn_img: np.ndarray,
-                        scale: int = Config.scale) -> Dict[str, float]:
+                       hr_img: np.ndarray, nn_img: np.ndarray) -> Dict[str, float]:
     metrices = {"lin_psnr": 0., "lin_ssim": 0., "nn_psnr": 0., "nn_ssim": 0.,
                 "cub_psnr": 0., "cub_ssim": 0.}
     metrices["nn_psnr"] = cv2.PSNR(nn_img, hr_img)
@@ -50,7 +47,8 @@ def calculate_metrices(lin_img: np.ndarray, cub_img: np.ndarray,
 
 def log_image_table(out_images: List[np.ndarray], gt: List[np.ndarray],
                     filenames: List[str], name: str, wandb: Module, 
-                    scale: int = Config.scale,) -> None:
+                    Config: dict, read_image: Callable, resize_image: Callable,
+                    rgb2srgb: Callable) -> None:
     wandb.init(
         project=f"{Config.project_name}_test",
         name=name,
@@ -65,9 +63,9 @@ def log_image_table(out_images: List[np.ndarray], gt: List[np.ndarray],
     for i in range(len(out_images)):
         lr_p, hr_p = filenames[i]
         lr_img = read_image(lr_p)
-        lin_img = resize_image(lr_img, scale, is_up=True, typ=cv2.INTER_LINEAR)
-        cub_img = resize_image(lr_img, scale, is_up=True, typ=cv2.INTER_CUBIC)
-        metrices = calculate_metrices(lin_img, cub_img, gt[i], out_images[i], scale)
+        lin_img = resize_image(lr_img, Config.scale, is_up=True, typ=cv2.INTER_LINEAR)
+        cub_img = resize_image(lr_img, Config.scale, is_up=True, typ=cv2.INTER_CUBIC)
+        metrices = calculate_metrices(lin_img, cub_img, gt[i], out_images[i], Config.scale)
         table.add_data(wandb.Image(rgb2srgb(lin_img)),
                        wandb.Image(rgb2srgb(cub_img)),
                        wandb.Image(rgb2srgb(out_images[i])),

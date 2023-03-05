@@ -3,28 +3,30 @@ from torch import Tensor
 from torch.utils.data import Dataset
 import h5py
 import numpy as np
-from SRGAN.imageproc import read_image, resize_image, crop_image
-from SRGAN.settings import Config
 
 
 class DatasetCreator:
     def __init__(self, filename: str, crop_times: int, img_files: List[str],
-                crop_area: int, scale: int) -> None:
+                crop_area: int, scale: int, read_image: Callable,
+                resize_image: Callable, crop_image: Callable) -> None:
        self.filename = filename
        self.crop_times = crop_times
        self.img_files = img_files
        self.crop_area = crop_area
        self.scale = scale
+       self.read_image = read_image
+       self.crop_image = crop_image
+       self.resize_image = resize_image
        return None
     
     def create_dataset(self) -> Tuple[np.ndarray, np.ndarray]:
         x_patches, y_patches = [], []
         for y_path in self.files:
-            y = read_image(y_path)
+            y = self.read_image(y_path)
             for _ in self.crop_times:
-                y_crop = crop_image(y, self.crop_area)
+                y_crop = self.crop_image(y, self.crop_area)
                 inter = np.random.randint(0, 3)
-                x_crop = resize_image(y_crop, self.scale, is_up=False, typ=inter)
+                x_crop = self.resize_image(y_crop, self.scale, is_up=False, typ=inter)
                 x_patches.append(x_crop)
                 y_patches.append(y_crop)
         return x_patches, y_patches
@@ -42,21 +44,25 @@ class DatasetCreator:
 
 
 class SRFolderDataset(Dataset):
-    def __init__(self, files: List[str], ts: Callable = None,
-                 crop_times: int = Config.crop_times, scale: int = Config.scale,
-                 crop_area: int = Config.crop_area) -> None:
+    def __init__(self, files: List[str], crop_times: int, scale: int,
+                 crop_area: int, read_image: Callable, resize_image: Callable,
+                 crop_image: Callable, ts: Callable = None) -> None:
         super(SRFolderDataset, self).__init__()
         self.files = files
         self.ts = ts
         self.crop_times = crop_times
         self.scale = scale
         self.crop_area = crop_area
+        self.read_image = read_image
+        self.crop_image = crop_image
+        self.resize_image = resize_image
+        return None
         
     def __getitem__(self, indx: int) -> Tuple[Tensor, Tensor]:
-        hr = read_image(self.files[indx // self.crop_times])
-        hr_crop = crop_image(hr, self.crop_area)
+        hr = self.read_image(self.files[indx // self.crop_times])
+        hr_crop = self.crop_image(hr, self.crop_area)
         inter = np.random.randint(0, 3)
-        lr_crop = resize_image(hr_crop, scale=self.scale, is_up=False, typ=inter)
+        lr_crop = self.resize_image(hr_crop, scale=self.scale, is_up=False, typ=inter)
         for t in self.ts:
             hr_crop = t(hr_crop)
             lr_crop = t(lr_crop)

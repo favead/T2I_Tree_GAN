@@ -2,18 +2,13 @@ from typing import List, Tuple, Dict, Callable, Module
 import copy
 import torch
 from torch import Tensor, nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
+from torch.optim.optimizer import Optimizer
 from torch.optim.lr_scheduler import StepLR
 import numpy as np
-from SRGAN.dataproc import SRDataset, SRTestDataset
-from SRGAN.imageproc import tensor2image
-from SRGAN.optim import Lion
-from SRGAN.settings import Config
-from SRGAN.metrics import AverageMeter
-
 
 def predict_one_sample(model: nn.Module, lr: Tensor, device: torch.device,
-                       tensor2image: Callable = tensor2image) -> np.ndarray:
+                       tensor2image: Callable) -> np.ndarray:
     model.eval()
     with torch.set_grad_enabled(False):
         x = lr.to(device)
@@ -23,10 +18,11 @@ def predict_one_sample(model: nn.Module, lr: Tensor, device: torch.device,
     return out
 
 
-def train(model: Dict[str, nn.Module], dataset: SRDataset, optim: Dict[str, Lion],
+def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimizer],
           scheduler: Dict[str, StepLR], loss_func: Dict[str, Callable], metric: Callable,
           wght_dir: Tuple[str, str], batch_size: int, epochs: int, wandb: Module,
-          device: torch.device, tqdm, vgg_modules: List[nn.Module]) -> None:
+          device: torch.device, tqdm, vgg_modules: List[nn.Module], Config: dict,
+          AverageMeter: object) -> None:
     dloader = DataLoader(dataset, shuffle=True, batch_size=batch_size, num_workers=2)
     losses = {"ep_generator_vgg_loss":[], "ep_generator_pixel_loss": [], "ep_generator_adv": [],
               "ep_discriminator_loss":[], "ep_generator_loss": [], "ep_generator_psnr": []}
@@ -109,7 +105,7 @@ def train(model: Dict[str, nn.Module], dataset: SRDataset, optim: Dict[str, Lion
     return None
 
 
-def predict(model: nn.Module, test_dataset: SRDataset) -> np.ndarray:
+def predict(model: nn.Module, test_dataset: Dataset) -> np.ndarray:
     model.eval()
     images = []
     out_images = []
