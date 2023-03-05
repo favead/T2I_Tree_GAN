@@ -125,8 +125,8 @@ def adversarial_loss(preds: Tensor, gt: Tensor) -> Tensor:
     return loss
 
 
-def perceptual_loss(fake: Tensor, real: Tensor, preds: Tensor, gt: Tensor,
-                    vgg_modules: List[nn.Module], device: torch.device,
+def perceptual_loss(vgg_modules: List[nn.Module], fake: Tensor, real: Tensor,
+                    preds: Tensor, gt: Tensor, device: torch.device,
                     Config: dict) -> Tuple[Tensor, Tensor, Tensor]:
     vgg_loss = sum(get_vgg_maps(vgg_modules, fake, real, device, Config))
     pixel_loss = F.l1_loss(real, fake)
