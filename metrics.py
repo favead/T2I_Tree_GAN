@@ -1,11 +1,10 @@
 import os
-from typing import List, Module, Dict, Callable
+from typing import List, Dict, Callable
 import torch
 from torch import Tensor
 import numpy as np
 import cv2
 from skimage.metrics import structural_similarity
-
 
 
 class AverageMeter:
