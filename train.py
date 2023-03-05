@@ -68,8 +68,9 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
             sr = model["generator"](lr)
             sr_labels = torch.ones(len(hr), 1).to(device)
             sr_preds = model["discriminator"](sr)
-            vgg_loss, pixel_loss, adv_loss = loss_func["generator"](vgg_modules, sr, hr, sr_preds, sr_labels)
-            loss = vgg_loss + 1e-2 * adv_loss + pixel_loss
+            vgg_loss, pixel_loss, adv_loss = loss_func["generator"](vgg_modules, sr, hr, sr_preds, sr_labels,
+                                                                    device, Config)
+            loss = 0.006 * vgg_loss + 1e-2 * adv_loss + pixel_loss
             optim["generator"].zero_grad()
             loss.backward()
             optim["generator"].step()
