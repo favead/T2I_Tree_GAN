@@ -1,10 +1,12 @@
 from typing import List, Tuple, Dict, Callable, Union
 import copy
 import torch
+import cv2
 from torch import Tensor, nn
 from torch.utils.data import DataLoader, Dataset
 from torch.optim.optimizer import Optimizer
 from torch.optim.lr_scheduler import StepLR
+from skimage.metrics import structural_similarity
 import numpy as np
 
 def predict_one_sample(model: nn.Module, lr: Tensor, device: torch.device,
@@ -22,7 +24,8 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
           scheduler: Dict[str, StepLR], loss_func: Dict[str, Callable], metric: Callable,
           wght_dir: Tuple[str, str], batch_size: int, epochs: int, wandb: object,
           device: torch.device, tqdm, vgg_modules: List[nn.Module], config: Dict[str, Union[str, int, float]],
-          AverageMeter: object) -> None:
+          AverageMeter: object, val_dataset: Dataset, tensor2image: Callable,
+          gc=None, save_weights: bool = True) -> None:
     dloader = DataLoader(dataset, shuffle=True, batch_size=batch_size, num_workers=2)
     losses = {"ep_generator_vgg_loss":[], "ep_generator_pixel_loss": [], "ep_generator_adv": [],
               "ep_discriminator_loss":[], "ep_generator_loss": [], "ep_generator_psnr": []}
@@ -83,7 +86,8 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
             wandb.log({"generator_vgg_loss": vgg_loss, "generator_pixel_loss": pixel_loss,
                        "generator_adv": adv_loss, "discriminator_loss": disc_loss,
                        "generator_loss": loss, "generator_psnr": gen_psnr})
-        wandb.finish()
+        if gc:
+            gc.collect()
         gen_psnr = gen_psnr_meter.avg
         scheduler["discriminator"].step()
         scheduler["generator"].step()
@@ -100,8 +104,22 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
         if losses["ep_generator_psnr"][-1] > best_metric:
             best_metric = losses["ep_generator_psnr"][-1]
             best_weights["generator"] = copy.deepcopy(model["generator"].state_dict())
-    torch.save(best_weights["generator"], wght_dir[1])
-    torch.save(best_weights["discriminator"], wght_dir[0])
+        table = wandb.Table(columns=["NN", "GT", "PSNR", "SSIM"])
+        lr, hr = val_dataset[0]
+        nn_img = predict_one_sample(model["generator"], device, tensor2image)
+        psnr = cv2.PSNR(nn_img, hr)
+        ssim = structural_similarity(nn_img, hr, channel_axis=2,
+                                            multichannel=True)
+        table.add_data(wandb.Image(nn_img), wandb.Image(hr), psnr, ssim)
+        wandb.log({"eval_epoch":table}, commit=False)
+        wandb.finish()
+    if save_weights:
+        torch.save(best_weights["generator"], wght_dir[1])
+        torch.save(best_weights["discriminator"], wght_dir[0])
+        wandb.init(project=f"{config['project_name']}_weights")
+        wandb.save(wght_dir[1])
+        wandb.save(wght_dir[0])
+        wandb.finish()
     return None
 
 
