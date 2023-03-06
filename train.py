@@ -25,7 +25,7 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
           wght_dir: Tuple[str, str], batch_size: int, epochs: int, wandb: object,
           device: torch.device, tqdm, vgg_modules: List[nn.Module], config: Dict[str, Union[str, int, float]],
           AverageMeter: object, val_dataset: Dataset, tensor2image: Callable,
-          gc=None, save_weights: bool = True) -> None:
+          gc=None, save_weights: bool = True, is_init: bool = False) -> None:
     dloader = DataLoader(dataset, shuffle=True, batch_size=batch_size, num_workers=2)
     losses = {"ep_generator_vgg_loss":[], "ep_generator_pixel_loss": [], "ep_generator_adv": [],
               "ep_discriminator_loss":[], "ep_generator_loss": [], "ep_generator_psnr": []}
@@ -34,10 +34,11 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
     best_disc_loss = np.inf
     best_metric = 0.0
     for epoch in tqdm(range(1, epochs + 1)):
-        wandb.init(
-            project=f"{config['version']}_train",
-            name=f"epoch_{epoch}",
-            config=config)
+        if not is_init:
+            wandb.init(
+                project=f"{config['version']}_train",
+                name=f"epoch_{epoch}",
+                config=config)
         disc_meter = AverageMeter()
         gen_meter = AverageMeter()
         gen_vgg_meter = AverageMeter()
@@ -104,15 +105,17 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
         if losses["ep_generator_psnr"][-1] > best_metric:
             best_metric = losses["ep_generator_psnr"][-1]
             best_weights["generator"] = copy.deepcopy(model["generator"].state_dict())
-        table = wandb.Table(columns=["NN", "GT", "PSNR", "SSIM"])
-        lr, hr = val_dataset[0]
-        nn_img = predict_one_sample(model["generator"], device, tensor2image)
-        psnr = cv2.PSNR(nn_img, hr)
-        ssim = structural_similarity(nn_img, hr, channel_axis=2,
-                                            multichannel=True)
-        table.add_data(wandb.Image(nn_img), wandb.Image(hr), psnr, ssim)
-        wandb.log({"eval_epoch":table}, commit=False)
-        wandb.finish()
+        if val_dataset:
+            table = wandb.Table(columns=["NN", "GT", "PSNR", "SSIM"])
+            lr, hr = val_dataset[0]
+            nn_img = predict_one_sample(model["generator"], lr, device, tensor2image)
+            psnr = cv2.PSNR(nn_img, hr)
+            ssim = structural_similarity(nn_img, hr, channel_axis=2,
+                                                multichannel=True)
+            table.add_data(wandb.Image(nn_img), wandb.Image(hr), psnr, ssim)
+            wandb.log({"eval_epoch":table}, commit=False)
+        if not is_init:
+            wandb.finish()
     if save_weights:
         torch.save(best_weights["generator"], wght_dir[1])
         torch.save(best_weights["discriminator"], wght_dir[0])
