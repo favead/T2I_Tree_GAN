@@ -69,6 +69,11 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
             loss.backward()
             optim["generator"].step()
             
+            ########_Update losses and metrics_#############
+            gen_psnr = metric(sr.cpu(), hr.cpu()).item()
+            disc_meter.update(disc_loss.item(), len(lr))
+            gen_psnr_meter.update(gen_psnr, len(sr))
+            
             wandb.log({"generator_vgg_loss": vgg_loss, "generator_pixel_loss": pixel_loss,
                        "generator_adv": adv_loss, "discriminator_loss": disc_loss,
                        "generator_loss": loss, "generator_psnr": gen_psnr})
