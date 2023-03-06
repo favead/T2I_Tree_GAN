@@ -61,7 +61,7 @@ def log_image_table(out_images: List[np.ndarray], gt: List[np.ndarray],
         lr_img = read_image(lr_p)
         lin_img = resize_image(lr_img, config["scale"], is_up=True, typ=cv2.INTER_LINEAR)
         cub_img = resize_image(lr_img, config["scale"], is_up=True, typ=cv2.INTER_CUBIC)
-        metrices = calculate_metrices(lin_img, cub_img, gt[i], out_images[i], config["scale"])
+        metrices = calculate_metrices(lin_img, cub_img, gt[i], out_images[i])
         table.add_data(wandb.Image(rgb2srgb(lin_img)),
                        wandb.Image(rgb2srgb(cub_img)),
                        wandb.Image(rgb2srgb(out_images[i])),
