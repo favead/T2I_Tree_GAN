@@ -38,10 +38,6 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
                 name=f"epoch_{epoch}",
                 config=config)
         disc_meter = AverageMeter()
-        gen_meter = AverageMeter()
-        gen_vgg_meter = AverageMeter()
-        gen_pixel_meter = AverageMeter()
-        gen_adv_meter = AverageMeter()
         gen_psnr_meter = AverageMeter()
         for x, y in dloader:
             lr, hr = x.to(device), y.to(device)
@@ -72,15 +68,6 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
             optim["generator"].zero_grad()
             loss.backward()
             optim["generator"].step()
-            
-            ########_Update losses and metrics_#############
-            gen_psnr = metric(sr.cpu(), hr.cpu()).item()
-            disc_meter.update(disc_loss.item(), len(lr))
-            gen_psnr_meter.update(gen_psnr, len(sr))
-            gen_meter.update(loss.item(), len(sr))
-            gen_vgg_meter.update(vgg_loss, len(sr))
-            gen_pixel_meter.update(pixel_loss, len(sr))
-            gen_adv_meter.update(adv_loss, len(sr))
             
             wandb.log({"generator_vgg_loss": vgg_loss, "generator_pixel_loss": pixel_loss,
                        "generator_adv": adv_loss, "discriminator_loss": disc_loss,
