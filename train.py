@@ -27,8 +27,6 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
           AverageMeter: object, val_dataset: Dataset, tensor2image: Callable,
           gc=None, save_weights: bool = True, is_init: bool = False) -> None:
     dloader = DataLoader(dataset, shuffle=True, batch_size=batch_size, num_workers=2)
-    losses = {"ep_generator_vgg_loss":[], "ep_generator_pixel_loss": [], "ep_generator_adv": [],
-              "ep_discriminator_loss":[], "ep_generator_loss": [], "ep_generator_psnr": []}
     best_weights = {"generator": copy.deepcopy(model["generator"].state_dict()),
                     "discriminator": copy.deepcopy(model["discriminator"].state_dict())}
     best_disc_loss = np.inf
@@ -92,18 +90,11 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
         gen_psnr = gen_psnr_meter.avg
         scheduler["discriminator"].step()
         scheduler["generator"].step()
-        losses["ep_discriminator_loss"].append(disc_meter.avg)
-        losses["ep_generator_psnr"].append(gen_psnr_meter.avg)
-        losses["ep_generator_vgg_loss"].append(gen_vgg_meter.avg)
-        losses["ep_generator_pixel_loss"].append(gen_pixel_meter.avg)
-        losses["ep_generator_adv"].append(gen_adv_meter.avg)
-        losses["ep_generator_loss"].append(gen_meter.avg)
-        print(losses)
-        if losses["ep_discriminator_loss"][-1] > best_disc_loss:
-            best_disc_loss = losses["ep_discriminator_loss"][-1]
+        if  disc_meter.avg > best_disc_loss:
+            best_disc_loss = disc_meter.avg
             best_weights["discriminator"] = copy.deepcopy(model["discriminator"].state_dict())
-        if losses["ep_generator_psnr"][-1] > best_metric:
-            best_metric = losses["ep_generator_psnr"][-1]
+        if  gen_psnr_meter.avg > best_metric:
+            best_metric = gen_psnr_meter.avg
             best_weights["generator"] = copy.deepcopy(model["generator"].state_dict())
         if val_dataset:
             table = wandb.Table(columns=["NN", "GT", "PSNR", "SSIM"])
