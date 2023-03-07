@@ -1,2 +1,2 @@
-# SRGAN
-My own implementation of SRGAN for single image super resolution.
+# TreeGAN
+DCGAN for synthesis pixelart tree images

@@ -1,9 +1,8 @@
-from typing import Dict, List, Tuple, Union, Callable
+from typing import Dict, List, Tuple, Callable, Union
 import torch
 from torch import nn, Tensor
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 
 
@@ -12,7 +11,7 @@ def show_image(img: np.ndarray) -> None:
     plt.show()
 
 
-def visualize_surface(X: np.ndarray, Y: np.ndarray, Z: np.ndarray, data: dict,
+def visualize_surface(X: np.ndarray, Y: np.ndarray, Z: np.ndarray, data: Dict[str, Union[str, float]],
                        figsize: Tuple[int, int] = (30, 15), save: bool = False) -> None:
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(121, projection='3d')
