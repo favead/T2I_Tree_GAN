@@ -44,10 +44,10 @@ class Generator(nn.Module):
     
 
 class DisBlock(nn.Module):
-    def __init__(self, in_c: int, out_c: int, stride: Tuple[int, int]) -> None:
+    def __init__(self, in_c: int, out_c: int, stride: Tuple[int, int], kernel_size=(3, 3)) -> None:
         super(DisBlock, self).__init__()
         self.block = nn.Sequential()
-        self.block.add_module("Conv", nn.Conv2d(in_c, out_c, kernel_size=(3, 3), stride=stride))
+        self.block.add_module("Conv", nn.Conv2d(in_c, out_c, kernel_size=kernel_size, stride=stride))
         self.block.add_module("BatchNorm", nn.BatchNorm2d(out_c))
         self.block.add_module("LRelu", nn.LeakyReLU(negative_slope=0.2))
         return None
@@ -65,7 +65,7 @@ class Discriminator(nn.Module):
         self.disc_block1 = DisBlock(conv_ch, conv_ch * 2, (2, 2)) # 6, 6
         self.disc_block2 = DisBlock(conv_ch * 2, conv_ch * 4, (1, 1)) # 4, 4
         self.disc_block3 = DisBlock(conv_ch * 4, conv_ch * 8, (1, 1)) # 2, 2
-        self.disc_block4 = DisBlock(conv_ch * 8, conv_ch * 16, (1, 1)) # 1, 1
+        self.disc_block4 = DisBlock(conv_ch * 8, conv_ch * 16, (1, 1), kernel_size=(2, 2)) # 1, 1
         self.linear1 = nn.Linear(conv_ch * 16, 1024)
         self.lrelu2 = nn.LeakyReLU(negative_slope=0.2)
         self.linear2 = nn.Linear(1024, 1)

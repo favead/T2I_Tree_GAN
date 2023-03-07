@@ -60,7 +60,7 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
     dloader = DataLoader(dataset, shuffle=True, batch_size=batch_size, num_workers=2)
     for epoch in tqdm(range(1, epochs + 1)):
         wandb.init(
-            project=f"{config['version']}_train",
+            project=f"{config['project_name']}_train",
             name=f"epoch_{epoch}",
             config=config)
         for x, y in dloader:
