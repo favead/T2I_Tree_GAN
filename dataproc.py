@@ -16,6 +16,7 @@ class SRFolderDataset(Dataset):
         
     def __getitem__(self, indx: int) -> Tuple[Tensor, Tensor]:
         y = self.read_image(self.files[indx])
+        assert y.shape == (16, 16, 3)
         x = torch.rand((y.shape))
         for t in self.ts:
             y = t(y)
