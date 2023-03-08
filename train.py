@@ -72,7 +72,7 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
         scheduler["generator"].step()
         if (epoch % config["checkpoint"]) == 0:
             gen = rgb2srgb(predict_one_sample(model["generator"], fake_const, device, tensor2image))
-            table = wandb.Tablel(columns=["Generated Tree"])
+            table = wandb.Table(columns=["Generated Tree"])
             wandb.log({"eval_epoch": table.add_data(wandb.Image(gen))}, commit=False)
         if (epoch % config["weight_checkpoint"]) == 0:
             torch.save(copy.deepcopy(model["discriminator"].state_dict()), f"{epoch}_ep_{wght_dir[0]}")
