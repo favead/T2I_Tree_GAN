@@ -26,7 +26,7 @@ class Generator(nn.Module):
         self.conv1 = nn.Conv2d(img_ch, conv_ch, kernel_size=(9, 9), padding=(9//2, 9//2))
         self.prelu1 = nn.PReLU()
         grbs = []
-        for _ in range(8):
+        for _ in range(14):
             grbs.append(GenResBlock(conv_ch, conv_ch))
         self.grbs = nn.Sequential(*grbs)
         self.conv2 = nn.Conv2d(conv_ch, conv_ch, kernel_size=(3, 3), padding=(1, 1))
