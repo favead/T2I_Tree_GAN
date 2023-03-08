@@ -66,7 +66,7 @@ class Discriminator(nn.Module):
         self.disc_block2 = DisBlock(conv_ch * 4, conv_ch * 6, (1, 1), kernel_size=(2, 2)) # 6, 6
         self.disc_block3 = DisBlock(conv_ch * 6, conv_ch * 8, (2, 2), kernel_size=(2, 2)) # 3, 3
         self.disc_block4 = DisBlock(conv_ch * 8, conv_ch * 8, (1, 1), kernel_size=(2, 2)) # 2, 2
-        self.disc_block4 = DisBlock(conv_ch * 8, conv_ch * 16, (1, 1), kernel_size=(2, 2)) # 1, 1
+        self.disc_block5 = DisBlock(conv_ch * 8, conv_ch * 16, (1, 1), kernel_size=(2, 2)) # 1, 1
         self.linear1 = nn.Linear(conv_ch * 16, 1024)
         self.lrelu2 = nn.LeakyReLU(negative_slope=0.2)
         self.linear2 = nn.Linear(1024, 1)
@@ -79,6 +79,7 @@ class Discriminator(nn.Module):
         out3 = self.disc_block2(out2)
         out4 = self.disc_block3(out3)
         out5 = self.disc_block4(out4)
+        out6 = self.disc_block5(out5)
         out6 = self.lrelu2(self.linear1(torch.flatten(out5, 1)))
         out7 = self.sigmoid(self.linear2(out6))
         return out7

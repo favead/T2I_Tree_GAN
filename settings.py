@@ -1,5 +1,5 @@
 config = {
-    "version": "1.0.2",
+    "version": "1.0.3",
     "batch_size": 256,
     "epochs": 100,
     "gamma_gen": 0.9,
@@ -11,5 +11,5 @@ config = {
     "checkpoint": 5,
     "weight_checkpoint": 15,
     "weight_dir": ("trg1_disc.pt", "trg1_gen.pt"),
-    "project_name": "TreeGAN_1.0.2"
+    "project_name": "TreeGAN_1.0.3"
 }
