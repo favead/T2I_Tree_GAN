@@ -71,7 +71,7 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
         scheduler["discriminator"].step()
         scheduler["generator"].step()
         if (epoch % config["checkpoint"]) == 0:
-            gen = rgb2srgb(predict_one_sample(model["generator"], device, tensor2image))
+            gen = rgb2srgb(predict_one_sample(model["generator"], fake_const, device, tensor2image))
             table = wandb.Tablel(columns=["Generated Tree"])
             wandb.log({"eval_epoch": table.add_data(wandb.Image(gen))}, commit=False)
         if (epoch % config["weight_checkpoint"]) == 0:
