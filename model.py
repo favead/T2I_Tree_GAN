@@ -60,11 +60,12 @@ class DisBlock(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self, img_c: int = 3, conv_ch: int = 64, conv_s: Tuple[int, int] = (2, 2)) -> None:
         super(Discriminator, self).__init__() # 16 16 3
-        self.conv1 = nn.Conv2d(img_c, conv_ch, kernel_size=(3, 3)) # 14, 14
+        self.conv1 = nn.Conv2d(img_c, conv_ch, kernel_size=(2, 2)) # 15, 15
         self.lrelu1 = nn.LeakyReLU(negative_slope=0.2)
-        self.disc_block1 = DisBlock(conv_ch, conv_ch * 2, (2, 2)) # 6, 6
-        self.disc_block2 = DisBlock(conv_ch * 2, conv_ch * 4, (1, 1)) # 4, 4
-        self.disc_block3 = DisBlock(conv_ch * 4, conv_ch * 8, (1, 1)) # 2, 2
+        self.disc_block1 = DisBlock(conv_ch, conv_ch * 4, (2, 2), kernel_size=(2, 2)) # 7, 7
+        self.disc_block2 = DisBlock(conv_ch * 4, conv_ch * 6, (1, 1), kernel_size=(2, 2)) # 6, 6
+        self.disc_block3 = DisBlock(conv_ch * 6, conv_ch * 8, (2, 2), kernel_size=(2, 2)) # 3, 3
+        self.disc_block4 = DisBlock(conv_ch * 8, conv_ch * 8, (1, 1), kernel_size=(2, 2)) # 2, 2
         self.disc_block4 = DisBlock(conv_ch * 8, conv_ch * 16, (1, 1), kernel_size=(2, 2)) # 1, 1
         self.linear1 = nn.Linear(conv_ch * 16, 1024)
         self.lrelu2 = nn.LeakyReLU(negative_slope=0.2)
