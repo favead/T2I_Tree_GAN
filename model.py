@@ -80,7 +80,7 @@ class Discriminator(nn.Module):
         out4 = self.disc_block3(out3)
         out5 = self.disc_block4(out4)
         out6 = self.disc_block5(out5)
-        out6 = self.lrelu2(self.linear1(torch.flatten(out5, 1)))
+        out6 = self.lrelu2(self.linear1(torch.flatten(out6, 1)))
         out7 = self.sigmoid(self.linear2(out6))
         return out7
 
