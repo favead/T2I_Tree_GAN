@@ -5,6 +5,16 @@ import torch.nn.functional as F
 from torch import nn, Tensor
 
 
+def weights_init(m: nn.Module) -> None:
+    classname = m.__class__.__name__
+    if classname.find('Conv') != -1:
+        nn.init.normal_(m.weight.data, 0.0, 0.02)
+    elif classname.find('BatchNorm') != -1:
+        nn.init.normal_(m.weight.data, 1.0, 0.02)
+        nn.init.constant_(m.bias.data, 0)
+    return None
+
+
 class GenTransposeBlock(nn.Module):
     def __init__(self, in_c: int, out_c: int, stride: int, padding: int,
                   is_last: bool = False) -> None:
