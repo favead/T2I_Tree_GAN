@@ -1,5 +1,5 @@
 config = {
-    "version": "2.3.0",
+    "version": "2.3.1",
     "batch_size": 256,
     "epochs": 60,
     "lr_gen": 2e-4,
@@ -9,5 +9,5 @@ config = {
     "checkpoint": 1,
     "weight_checkpoint": 15,
     "weight_dir": ("trg2_0_0_disc.pt", "trg2_0_0_gen.pt"),
-    "project_name": "TreeGAN_2.3.0"
+    "project_name": "TreeGAN_2.3.1"
 }

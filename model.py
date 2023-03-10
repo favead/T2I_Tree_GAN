@@ -21,7 +21,7 @@ class GenTransposeBlock(nn.Module):
         self.tconv1 = nn.ConvTranspose2d(in_c, out_c, kernel_size=4, stride=stride,
                                                                 padding=padding)
         self.prelu = nn.PReLU()
-        self.tconv2 = nn.ConvTranspose2d(out_c, out_c, kernel_size=3, stride=1,
+        self.tconv2 = nn.ConvTranspose2d(out_c, out_c, kernel_size=1, stride=1,
                                                                 padding=0)
         return None
 
@@ -30,6 +30,7 @@ class GenTransposeBlock(nn.Module):
         out2 = self.prelu(out1)
         out3 = self.tconv2(out2)
         out4 = torch.add(out1, out3)
+        out4 = self.prelu(out4)
         return out4
 
 
