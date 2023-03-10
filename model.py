@@ -7,7 +7,7 @@ from torch import nn, Tensor
 
 def weights_init(m: nn.Module) -> None:
     classname = m.__class__.__name__
-    if classname.find('Conv') != -1:
+    if (classname.find('Conv') | classname.find('ConvTranspose')) != -1:
         nn.init.normal_(m.weight.data, 0.0, 0.02)
     elif classname.find('BatchNorm') != -1:
         nn.init.normal_(m.weight.data, 1.0, 0.02)
@@ -16,22 +16,21 @@ def weights_init(m: nn.Module) -> None:
 
 
 class GenTransposeBlock(nn.Module):
-    def __init__(self, in_c: int, out_c: int, stride: int, padding: int,
-                  is_last: bool = False) -> None:
+    def __init__(self, in_c: int, out_c: int, stride: int, padding: int) -> None:
         super(GenTransposeBlock, self).__init__()
-        self.block = nn.Sequential()
-        self.block.add_module("ConvTranspose", nn.ConvTranspose2d(in_c, out_c, kernel_size=4, stride=stride,
-                                                                   padding=padding))
-        if is_last:
-            self.block.add_module("Tanh", nn.Tanh())
-        else:
-            self.block.add_module("BatchNorm", nn.BatchNorm2d(out_c))
-            self.block.add_module("ReLU", nn.ReLU(inplace=True))
+        self.tconv1 = nn.ConvTranspose2d(in_c, out_c, kernel_size=4, stride=stride,
+                                                                padding=padding)
+        self.prelu = nn.PReLU()
+        self.tconv2 = nn.ConvTranspose2d(out_c, out_c, kernel_size=3, stride=1,
+                                                                padding=0)
         return None
 
     def forward(self, x: Tensor) -> Tensor:
-        out = self.block(x)
-        return out
+        out1 = self.tconv1(x)
+        out2 = self.prelu(out1)
+        out3 = self.tconv2(out2)
+        out4 = torch.add(out1, out3)
+        return out4
 
 
 class Generator(nn.Module):
@@ -41,7 +40,7 @@ class Generator(nn.Module):
         self.tconv1 = GenTransposeBlock(100, 1024, 1, 1) # (BS, 1024, 2, 2)
         self.tconv2 = GenTransposeBlock(1024, 512, 2, 1) # (BS, 512, 4, 4)
         self.tconv3 = GenTransposeBlock(512, 128, 2, 1) # (BS, 128, 8, 8)
-        self.tconv4 = GenTransposeBlock(128, 3, 2, 1, is_last=True) # (BS, 3, 16, 16)
+        self.tconv4 = GenTransposeBlock(128, 3, 2, 1) # (BS, 3, 16, 16)
         return None
     
     def forward(self, x: Tensor) -> Tensor:
@@ -49,7 +48,8 @@ class Generator(nn.Module):
         out2 = self.tconv2(out1)
         out3 = self.tconv3(out2)
         out4 = self.tconv4(out3)
-        return out4
+        out5 = torch.tanh(out4)
+        return out5
 
 
 class DiscBlock(nn.Module):
