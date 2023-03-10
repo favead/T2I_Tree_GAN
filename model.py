@@ -28,7 +28,7 @@ class Generator(nn.Module):
     def __init__(self) -> None:
         super(Generator, self).__init__()
         # init: (BS, 100, 1, 1)
-        self.tconv1 = GenTransposeBlock(100, 1024, 1, 0) # (BS, 1024, 2, 2)
+        self.tconv1 = GenTransposeBlock(100, 1024, 1, 1) # (BS, 1024, 2, 2)
         self.tconv2 = GenTransposeBlock(1024, 512, 2, 1) # (BS, 512, 4, 4)
         self.tconv3 = GenTransposeBlock(512, 128, 2, 1) # (BS, 128, 8, 8)
         self.tconv4 = GenTransposeBlock(128, 3, 2, 1, is_last=True) # (BS, 3, 16, 16)
