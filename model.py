@@ -65,10 +65,10 @@ class DiscBlock(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self) -> None:
         super(Discriminator, self).__init__() # 16 16 3
-        self.conv1 = DiscBlock(16, 8, 2, 1)
-        self.conv2 = DiscBlock(8, 4, 2, 1)
-        self.conv3 = DiscBlock(4, 2, 2, 1)
-        self.conv4 = DiscBlock(2, 1, 2, 1, is_last=True)
+        self.conv1 = DiscBlock(3, 128, 2, 1)
+        self.conv2 = DiscBlock(128, 256, 2, 1)
+        self.conv3 = DiscBlock(256, 512, 2, 1)
+        self.conv4 = DiscBlock(512, 1, 2, 1, is_last=True)
         return None
     
     def forward(self, x: Tensor) -> Tensor:
