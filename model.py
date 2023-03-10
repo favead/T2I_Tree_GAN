@@ -10,7 +10,7 @@ class GenTransposeBlock(nn.Module):
                   is_last: bool = False) -> None:
         super(GenTransposeBlock, self).__init__()
         self.block = nn.Sequential()
-        self.block.add_module("ConvTranspose", nn.ConvTranspose2d(in_c, out_c, kernel_size=2, stride=stride,
+        self.block.add_module("ConvTranspose", nn.ConvTranspose2d(in_c, out_c, kernel_size=4, stride=stride,
                                                                    padding=padding))
         if is_last:
             self.block.add_module("Tanh", nn.Tanh())
@@ -39,8 +39,7 @@ class Generator(nn.Module):
         out2 = self.tconv2(out1)
         out3 = self.tconv3(out2)
         out4 = self.tconv4(out3)
-        out5 = self.tconv5(out4)
-        return out5
+        return out4
 
 
 class DiscBlock(nn.Module):
@@ -48,7 +47,7 @@ class DiscBlock(nn.Module):
                  is_last: bool = False) -> None:
         super(DiscBlock, self).__init__()
         self.block = nn.Sequential()
-        self.block.add_module("Conv", nn.Conv2d(in_c, out_c, kernel_size=2, stride=stride,
+        self.block.add_module("Conv", nn.Conv2d(in_c, out_c, kernel_size=4, stride=stride,
                                                 padding=padding))
         if is_last:
             self.block.add_module("Sigmoid", nn.Sigmoid())
@@ -76,6 +75,7 @@ class Discriminator(nn.Module):
         out2 = self.conv2(out1)
         out3 = self.conv3(out2)
         out4 = self.conv4(out3)
+        out4 = torch.flatten(out4, 1)
         return out4
 
 
