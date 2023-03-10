@@ -21,12 +21,12 @@ class GenResBlock(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, img_ch: int = 3, conv_ch: int = 64) -> None:
+    def __init__(self, img_ch: int = 3, conv_ch: int = 64, n_layers: int = 14) -> None:
         super(Generator, self).__init__()
         self.conv1 = nn.Conv2d(img_ch, conv_ch, kernel_size=(9, 9), padding=(9//2, 9//2))
         self.prelu1 = nn.PReLU()
         grbs = []
-        for _ in range(14):
+        for _ in range(n_layers):
             grbs.append(GenResBlock(conv_ch, conv_ch))
         self.grbs = nn.Sequential(*grbs)
         self.conv2 = nn.Conv2d(conv_ch, conv_ch, kernel_size=(3, 3), padding=(1, 1))
