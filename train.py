@@ -25,7 +25,7 @@ def iter_disc(x: Tensor, y:Tensor, model: Dict[str, nn.Module], optim: Optimizer
     gen_labels, y_labels = torch.zeros(len(gen), 1).to(device), torch.ones(len(y), 1).to(device)
     gen_preds, y_preds = model["discriminator"](gen), model["discriminator"](y)
     gen_loss, y_loss = loss_func(gen_preds, gen_labels), loss_func(y_preds, y_labels)
-    disc_loss = (gen_loss + y_loss) / 2.
+    disc_loss = gen_loss + y_loss
     optim.zero_grad()
     disc_loss.backward()
     optim.step()

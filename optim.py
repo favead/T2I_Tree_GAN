@@ -3,7 +3,7 @@ from torch.optim.optimizer import Optimizer
 
 
 class Lion(Optimizer):
-    def __init__(self, params, lr=2e-4, betas=(0.9, 0.5), weight_decay=0.0):
+    def __init__(self, params, lr=2e-4, betas=(0.9, 0.98), weight_decay=0.0):
         if not 0.0 <= lr:
             raise ValueError('Invalid learning rate: {}'.format(lr))
         if not 0.0 <= betas[0] < 1.0:

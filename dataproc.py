@@ -2,7 +2,6 @@ from typing import Callable, Tuple, List
 import torch
 from torch import Tensor
 from torch.utils.data import Dataset
-import h5py
 import numpy as np
 
 
@@ -17,10 +16,9 @@ class SRFolderDataset(Dataset):
     def __getitem__(self, indx: int) -> Tuple[Tensor, Tensor]:
         y = self.read_image(self.files[indx])
         assert y.shape == (16, 16, 3)
-        x = torch.rand((y.shape))
+        x = torch.randn(100, 1, 1)
         for t in self.ts:
             y = t(y)
-            x = t(x)
         return x, y
         
     def __len__(self) -> int:
