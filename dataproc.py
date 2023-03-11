@@ -8,7 +8,7 @@ import h5py
 
 class SRFileDataset(Dataset):
     def __init__(self, filename: str, ts: Callable = None) -> None:
-        super(SRFolderDataset, self).__init__()
+        super(SRFileDataset, self).__init__()
         self.filename = filename
         self.ts = ts
         return None
