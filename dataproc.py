@@ -2,8 +2,6 @@ from typing import Callable, Tuple, List
 import torch
 from torch import Tensor
 from torch.utils.data import Dataset
-import numpy as np
-from PIL import Image
 
 
 class SRFolderDataset(Dataset):

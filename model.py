@@ -42,7 +42,6 @@ class Generator(nn.Module):
         self.tconv2 = GenTransposeBlock(1024, 512, 2, 1) # (BS, 512, 4, 4)
         self.tconv3 = GenTransposeBlock(512, 128, 2, 1) # (BS, 128, 8, 8)
         self.tconv4 = GenTransposeBlock(128, 3, 2, 1) # (BS, 3, 16, 16)
-        return None
     
     def forward(self, x: Tensor) -> Tensor:
         out1 = self.tconv1(x)
@@ -65,7 +64,6 @@ class DiscBlock(nn.Module):
         else:
             self.block.add_module("BatchNorm", nn.BatchNorm2d(out_c))
             self.block.add_module("LRelu", nn.LeakyReLU(negative_slope=0.2))
-        return None
     
     def forward(self, x: Tensor) -> Tensor:
         out = self.block(x)

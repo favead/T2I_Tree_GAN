@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8888c8f7-d5cf-4f43-b815-76090447e16e" name="Changes" comment="" />
+    <list default="true" id="8888c8f7-d5cf-4f43-b815-76090447e16e" name="Changes" comment="Remove unused dependencies" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
