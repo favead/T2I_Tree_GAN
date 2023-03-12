@@ -3,25 +3,23 @@ import torch
 from torch import Tensor
 from torch.utils.data import Dataset
 import numpy as np
-import h5py
+from PIL import Image
 
 
-class SRFileDataset(Dataset):
-    def __init__(self, filename: str, ts: Callable = None) -> None:
-        super(SRFileDataset, self).__init__()
-        self.filename = filename
+class SRFolderDataset(Dataset):
+    def __init__(self, files: List[str], read_image: Callable, ts: List[Callable] = None) -> None:
+        super(SRFolderDataset, self).__init__()
+        self.files = files
+        self.read_image = read_image
         self.ts = ts
-        return None
 
-    def __getitem__(self, indx: int) -> Tuple[Tensor, Tensor]:
+    def __getitem__(self, index: int) -> Tuple[Tensor, Tensor]:
         x = torch.randn(100, 1, 1)
-        with h5py.File(self.filename, 'r') as f:
-            y = f['y'][indx]
-            assert y.shape == (16, 16, 3)
-            for t in self.ts:
-                y = t(y)
-            return x, y
+        y = self.read_image(self.files[index])
+        assert y.shape == (16, 16, 3)
+        for t in self.ts:
+            y = t(y)
+        return x, y
 
     def __len__(self) -> int:
-        with h5py.File(self.filename, 'r') as f:
-            return len(f['y'])
+        return len(self.files)
