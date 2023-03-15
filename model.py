@@ -23,7 +23,6 @@ class GenTransposeBlock(nn.Module):
         self.prelu = nn.PReLU()
         self.tconv2 = nn.ConvTranspose2d(out_c, out_c, kernel_size=1, stride=1,
                                                                 padding=0)
-        return None
 
     def forward(self, x: Tensor) -> Tensor:
         out1 = self.tconv1(x)
@@ -35,10 +34,10 @@ class GenTransposeBlock(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, inp_dim: int) -> None:
         super(Generator, self).__init__()
         # init: (BS, 100, 1, 1)
-        self.tconv1 = GenTransposeBlock(100, 1024, 1, 1) # (BS, 1024, 2, 2)
+        self.tconv1 = GenTransposeBlock(inp_dim, 1024, 1, 1) # (BS, 1024, 2, 2)
         self.tconv2 = GenTransposeBlock(1024, 512, 2, 1) # (BS, 512, 4, 4)
         self.tconv3 = GenTransposeBlock(512, 128, 2, 1) # (BS, 128, 8, 8)
         self.tconv4 = GenTransposeBlock(128, 3, 2, 1) # (BS, 3, 16, 16)
@@ -73,23 +72,32 @@ class DiscBlock(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self) -> None:
         super(Discriminator, self).__init__() # 16 16 3
-        self.conv1 = DiscBlock(3, 128, 2, 1)
-        self.conv2 = DiscBlock(128, 256, 2, 1)
-        self.conv3 = DiscBlock(256, 512, 2, 1)
-        self.conv4 = DiscBlock(512, 1, 2, 1, is_last=True)
-        return None
-    
-    def forward(self, x: Tensor) -> Tensor:
+        self.conv1 = DiscBlock(3, 128, 2, 1) # 3 8 8
+        self.conv2 = DiscBlock(128, 256, 2, 1) # 256 4 4
+        self.conv3 = DiscBlock(304, 512, 2, 1) # 512 2 2
+        self.conv4 = DiscBlock(512, 1, 2, 1, is_last=True) # 1 1 1
+
+    def forward(self, x: Tensor, embed: Tensor) -> Tensor:
         out1 = self.conv1(x)
         out2 = self.conv2(out1)
+        out2 = torch.hstack((out2, embed.view(48, 4, 4)))
         out3 = self.conv3(out2)
         out4 = self.conv4(out3)
         out4 = torch.flatten(out4, 1)
         return out4
 
 
-def adversarial_loss(preds: Tensor, gt: Tensor) -> Tensor:
-    loss = F.binary_cross_entropy(preds, gt)
+def discriminator_loss(sr: Tensor, sw: Tensor, sf: Tensor) -> Tensor:
+    sr_l = torch.ones((len(sr), 1))
+    sw_sf_l = torch.zeros((len(sw), 1))
+    loss = F.binary_cross_entropy(sr, sr_l)
+    loss += 0.5 * (F.binary_cross_entropy(sw, sw_sf_l) + F.binary_cross_entropy(sf, sw_sf_l))
+    return loss
+
+
+def generator_loss(sf: Tensor) -> Tensor:
+    sf_l = torch.ones((len(sf), 1))
+    loss = F.binary_cross_entropy(sf, sf_l)
     return loss
 
 

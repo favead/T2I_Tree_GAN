@@ -6,14 +6,6 @@ from torch import Tensor
 from torchvision.transforms.functional import to_tensor
 
 
-def srgb2rgb(img: np.ndarray) -> np.ndarray:
-    return (np.power(img/255., 2.2)*255).astype(np.uint8)
-
-
-def rgb2srgb(img: np.ndarray) -> np.ndarray:
-    return (np.power(img/255., 1/2.2)*255).astype(np.uint8)
-
-
 def read_image(img_path: str, mode: str = 'RGB') -> np.ndarray:
     img = cv2.imread(img_path)[...,::-1]
     if mode == 'RGB':
