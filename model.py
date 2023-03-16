@@ -80,23 +80,23 @@ class Discriminator(nn.Module):
     def forward(self, x: Tensor, embed: Tensor) -> Tensor:
         out1 = self.conv1(x)
         out2 = self.conv2(out1)
-        out2 = torch.hstack((out2, embed.view(48, 4, 4)))
+        out2 = torch.hstack((out2, embed.view(embed.size()[0], 48, 4, 4)))
         out3 = self.conv3(out2)
         out4 = self.conv4(out3)
         out4 = torch.flatten(out4, 1)
         return out4
 
 
-def discriminator_loss(sr: Tensor, sw: Tensor, sf: Tensor) -> Tensor:
-    sr_l = torch.ones((len(sr), 1))
-    sw_sf_l = torch.zeros((len(sw), 1))
+def discriminator_loss(sr: Tensor, sw: Tensor, sf: Tensor, device: torch.device) -> Tensor:
+    sr_l = torch.ones((len(sr), 1)).to(device)
+    sw_sf_l = torch.zeros((len(sw), 1)).to(device)
     loss = F.binary_cross_entropy(sr, sr_l)
     loss += 0.5 * (F.binary_cross_entropy(sw, sw_sf_l) + F.binary_cross_entropy(sf, sw_sf_l))
     return loss
 
 
-def generator_loss(sf: Tensor) -> Tensor:
-    sf_l = torch.ones((len(sf), 1))
+def generator_loss(sf: Tensor, device: torch.device) -> Tensor:
+    sf_l = torch.ones((len(sf), 1)).to(device)
     loss = F.binary_cross_entropy(sf, sf_l)
     return loss
 

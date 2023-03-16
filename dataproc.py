@@ -15,7 +15,7 @@ class T2IFolderDataset(Dataset):
         self.ts = ts
 
     def get_wrong_caption(self, actual_index: int) -> str:
-        index = torch.rand(0, len(self.files), 1)
+        index = torch.randint(0, len(self.files), (1,)).item()
         if index == actual_index:
             return self.get_wrong_caption(actual_index)
         rnd_caption = self.read_data(self.files[index])['caption']
@@ -27,6 +27,8 @@ class T2IFolderDataset(Dataset):
         y = self.read_image(sample['img_path'])
         wrong_cap = self.get_wrong_caption(index)
         wrong_emb = 0.5 * self.get_embedding(wrong_cap) + 0.5 * sent_emb
+        sent_emb = sent_emb.view(768, 1, 1)
+        wrong_emb = wrong_emb.view(768, 1, 1)
         for t in self.ts:
             y = t(y)
         return sent_emb, wrong_emb, y

@@ -24,18 +24,25 @@ def iter_train(x: Tensor, sent_emb: Tensor, wrong_emb: Tensor, y:Tensor,
                device: torch.device, loss_func: Dict[str, Callable],
                wandb: object) -> None:
     x_emb = torch.hstack((x, sent_emb)).to(device)
-    gen = model["generator"](x_emb)
+    with torch.set_grad_enabled(False):
+        gen = model["generator"](x_emb)
     sr = model["discriminator"](y, sent_emb)
     sw = model["discriminator"](y, wrong_emb)
     sf = model["discriminator"](gen, sent_emb)
     loss_d = loss_func["discriminator"](sr, sw, sf)
+
     optim["discriminator"].zero_grad()
     loss_d.backward()
     optim["discriminator"].step()
+
+    gen = model["generator"](x_emb)
+    sf = model["discriminator"](gen, sent_emb)
     loss_g = loss_func["generator"](sf)
+
     optim["generator"].zero_grad()
     loss_g.backward()
     optim["generator"].step()
+
     wandb.log({"generator_loss": loss_g.item(), "discriminator_loss": loss_d.item(),
                "disc_gt_remb": sr.item(), "disc_gt_wemb": sw, "disc_gen_remb": sf.item()})
     return None
