@@ -51,7 +51,7 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
           scheduler: Dict[str, StepLR], loss_func: Dict[str, Callable],
           wght_dir: Tuple[str, str], batch_size: int, epochs: int, wandb: object,
           device: torch.device, tqdm, config: Dict[str, Union[str, int, float]],
-          tensor2image: Callable, rgb2srgb: Callable, fake_const: Tensor, fake_cap: str,
+          tensor2image: Callable, rgb2srgb: Callable, fake_const: Tensor,
           gc=None) -> None:
     dloader = DataLoader(dataset, shuffle=True, batch_size=batch_size, num_workers=2)
     for epoch in tqdm(range(1, epochs + 1)):
@@ -70,7 +70,7 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
             scheduler["generator"].step()
         if (epoch % config["checkpoint"]) == 0:
             gen = (predict_one_sample(model["generator"], fake_const, device, tensor2image))
-            wandb.log({"image": wandb.Image(gen), "caption": fake_cap})
+            wandb.log({"image": wandb.Image(gen)})
         if (epoch % config["weight_checkpoint"]) == 0:
             torch.save(copy.deepcopy(model["discriminator"].state_dict()), f"{epoch}_ep_{wght_dir[0]}")
             torch.save(copy.deepcopy(model["generator"].state_dict()), f"{epoch}_ep_{wght_dir[1]}")
