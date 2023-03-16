@@ -29,7 +29,7 @@ def iter_train(x: Tensor, sent_emb: Tensor, wrong_emb: Tensor, y:Tensor,
     sr = model["discriminator"](y, sent_emb)
     sw = model["discriminator"](y, wrong_emb)
     sf = model["discriminator"](gen, sent_emb)
-    loss_d = loss_func["discriminator"](sr, sw, sf)
+    loss_d = loss_func["discriminator"](sr, sw, sf, device)
 
     optim["discriminator"].zero_grad()
     loss_d.backward()
@@ -37,7 +37,7 @@ def iter_train(x: Tensor, sent_emb: Tensor, wrong_emb: Tensor, y:Tensor,
 
     gen = model["generator"](x_emb)
     sf = model["discriminator"](gen, sent_emb)
-    loss_g = loss_func["generator"](sf)
+    loss_g = loss_func["generator"](sf, device)
 
     optim["generator"].zero_grad()
     loss_g.backward()
