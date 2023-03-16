@@ -43,8 +43,7 @@ def iter_train(x: Tensor, sent_emb: Tensor, wrong_emb: Tensor, y:Tensor,
     loss_g.backward()
     optim["generator"].step()
 
-    wandb.log({"generator_loss": loss_g.item(), "discriminator_loss": loss_d.item(),
-               "disc_gt_remb": sr.detach().cpu(), "disc_gt_wemb": sw.detach().cpu(), "disc_gen_remb": sf.detach().cpu()})
+    wandb.log({"generator_loss": loss_g.item(), "discriminator_loss": loss_d.item()})
     return None
 
 
