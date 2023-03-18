@@ -22,26 +22,30 @@ def predict_one_sample(model: nn.Module, lr: Tensor, device: torch.device,
 def iter_train(x: Tensor, sent_emb: Tensor, wrong_emb: Tensor, y:Tensor,
                model: Dict[str, nn.Module], optim: Dict[str, Optimizer],
                device: torch.device, loss_func: Dict[str, Callable],
-               wandb: object) -> None:
+               wandb: object, gen_epoch: int, disc_epoch: int) -> None:
     x_emb = torch.hstack((x, sent_emb)).to(device)
-    with torch.set_grad_enabled(False):
+    
+    for _ in range(disc_iter):
+        with torch.set_grad_enabled(False):
+            gen = model["generator"](x_emb)
+        sr = model["discriminator"](y, sent_emb)
+        sw = model["discriminator"](y, wrong_emb)
+        sf = model["discriminator"](gen, sent_emb)
+        loss_d = loss_func["discriminator"](sr, sw, sf, device)
+
+        optim["discriminator"].zero_grad()
+        loss_d.backward()
+        optim["discriminator"].step()
+
+    
+    for _ in range(gen_iter):
         gen = model["generator"](x_emb)
-    sr = model["discriminator"](y, sent_emb)
-    sw = model["discriminator"](y, wrong_emb)
-    sf = model["discriminator"](gen, sent_emb)
-    loss_d = loss_func["discriminator"](sr, sw, sf, device)
+        sf = model["discriminator"](gen, sent_emb)
+        loss_g = loss_func["generator"](sf, device)
 
-    optim["discriminator"].zero_grad()
-    loss_d.backward()
-    optim["discriminator"].step()
-
-    gen = model["generator"](x_emb)
-    sf = model["discriminator"](gen, sent_emb)
-    loss_g = loss_func["generator"](sf, device)
-
-    optim["generator"].zero_grad()
-    loss_g.backward()
-    optim["generator"].step()
+        optim["generator"].zero_grad()
+        loss_g.backward()
+        optim["generator"].step()
 
     wandb.log({"generator_loss": loss_g.item(), "discriminator_loss": loss_d.item()})
     return None
@@ -62,7 +66,8 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
         for sent_emb, wrong_emb, y in dloader:
             x = torch.randn(batch_size, 100, 1, 1)
             x, sent_emb, wrong_emb, y = x.to(device), sent_emb.to(device), wrong_emb.to(device), y.to(device)
-            iter_train(x, sent_emb, wrong_emb, y, model, optim, device, loss_func, wandb)
+            iter_train(x, sent_emb, wrong_emb, y, model, optim, device, loss_func, wandb, config['gen_iter'],
+            config['disc_iter'])
         if gc:
             gc.collect()
         if scheduler:
