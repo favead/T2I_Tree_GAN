@@ -22,7 +22,7 @@ def predict_one_sample(model: nn.Module, lr: Tensor, device: torch.device,
 def iter_train(x: Tensor, sent_emb: Tensor, wrong_emb: Tensor, y:Tensor,
                model: Dict[str, nn.Module], optim: Dict[str, Optimizer],
                device: torch.device, loss_func: Dict[str, Callable],
-               wandb: object, gen_epoch: int, disc_epoch: int) -> None:
+               wandb: object, gen_iter: int, disc_iter: int) -> None:
     x_emb = torch.hstack((x, sent_emb)).to(device)
     
     for _ in range(disc_iter):
