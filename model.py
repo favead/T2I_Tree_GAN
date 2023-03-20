@@ -80,7 +80,7 @@ class Discriminator(nn.Module):
     def forward(self, x: Tensor, embed: Tensor) -> Tensor:
         out1 = self.conv1(x)
         out2 = self.conv2(out1)
-        out2 = torch.hstack((out2, embed.view(embed.size()[0], 48, 4, 4)))
+        out2 = torch.hstack((out2, embed))
         out3 = self.conv3(out2)
         out4 = self.conv4(out3)
         out4 = torch.flatten(out4, 1)
