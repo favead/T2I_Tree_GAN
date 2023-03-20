@@ -56,7 +56,7 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
           wght_dir: Tuple[str, str], batch_size: int, epochs: int, wandb: object,
           device: torch.device, tqdm, config: Dict[str, Union[str, int, float]],
           tensor2image: Callable, rgb2srgb: Callable, fake_const: Tensor,
-          gc=None) -> None:
+          get_embedding: Callable, get_wrong_embedding: Callable, gc=None) -> None:
     dloader = DataLoader(dataset, shuffle=False, batch_size=batch_size, num_workers=2)
     for epoch in tqdm(range(1, epochs + 1)):
         wandb.init(
