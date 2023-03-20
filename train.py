@@ -19,12 +19,10 @@ def predict_one_sample(model: nn.Module, lr: Tensor, device: torch.device,
     return out
 
 
-def iter_train(x: Tensor, sent_emb: Tensor, wrong_emb: Tensor, y:Tensor,
+def iter_train(x: Tensor, gen_emb: Tensor, disc_emb: Tensor, wrong_emb: Tensor, y:Tensor,
                model: Dict[str, nn.Module], optim: Dict[str, Optimizer],
                device: torch.device, loss_func: Dict[str, Callable],
                wandb: object, gen_iter: int, disc_iter: int) -> None:
-    gen_emb = torch.hstack((x, sent_emb)).to(device)
-    disc_emb = sent_embed.view(sent_embed.size()[0], 48, 4, 4)
     for _ in range(disc_iter):
         with torch.set_grad_enabled(False):
             gen = model["generator"](gen_emb)
@@ -66,9 +64,11 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
         for i, y in tqdm(enumerate(dloader)):
             x = torch.randn(batch_size, 100, 1, 1)
             sent_emb = get_embedding(i)
-            wrong_emb = get_wrong_embedding(i)
-            x, sent_emb, wrong_emb, y = x.to(device), sent_emb.to(device), wrong_emb.to(device), y.to(device)
-            iter_train(x, sent_emb, wrong_emb, y, model, optim, device, loss_func, wandb, config['gen_iter'],
+            wrong_emb = get_wrong_embedding(i).view(batch_size, 48, 4, 4)
+            gen_emb = torch.hstack((x, sent_emb.view(batch_size, 768, 1, 1)))
+            disc_emb = sent_emb.view(batch_size, 48, 4, 4)
+            x, gen_emb, disc_emb, wrong_emb, y = x.to(device), gen_emb.to(device), disc_emb.to(device), wrong_emb.to(device), y.to(device)
+            iter_train(x, gen_emb, disc_emb, wrong_emb, y, model, optim, device, loss_func, wandb, config['gen_iter'],
             config['disc_iter'])
         if gc:
             gc.collect()
