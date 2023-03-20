@@ -54,7 +54,7 @@ def iter_train(x: Tensor, sent_emb: Tensor, wrong_emb: Tensor, y:Tensor,
 def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimizer],
           scheduler: Dict[str, StepLR], loss_func: Dict[str, Callable],
           wght_dir: Tuple[str, str], batch_size: int, epochs: int, wandb: object,
-          device: torch.device, tqdm, config: Dict[str, Union[str, int, float]],
+          device: torch.device, tqdm, config: Dict[str, Any],
           tensor2image: Callable, rgb2srgb: Callable, fake_const: Tensor,
           get_embedding: Callable, get_wrong_embedding: Callable, gc=None) -> None:
     dloader = DataLoader(dataset, shuffle=False, batch_size=batch_size, num_workers=2)
