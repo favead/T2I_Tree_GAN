@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, Callable, Union
+from typing import Tuple, Dict, Callable, Any
 import copy
 import torch
 from torch import Tensor, nn
@@ -61,7 +61,7 @@ def train(model: Dict[str, nn.Module], dataset: Dataset, optim: Dict[str, Optimi
             project=f"{config['project_name']}_train",
             name=f"epoch_{epoch}",
             config=config)
-        for i, y in tqdm(enumerate(dloader)):
+        for i, y in enumerate(dloader):
             x = torch.randn(batch_size, 100, 1, 1)
             sent_emb = get_embedding(i)
             wrong_emb = get_wrong_embedding(i).view(batch_size, 48, 4, 4)
